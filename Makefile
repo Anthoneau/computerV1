@@ -1,21 +1,18 @@
 #BASE
 
-NAME		=	computer
-LIBFT		=	libft/libft.a
-CC			=	g++
-CFLAGS		=	-Wall -Wextra -Werror
-SRCS		=	main.c
+NAME		=	computerv1
+CXX			=	c++
+CXXFLAGS	=	-Wall -Wextra -Werror -MMD -MP -g -I${INCL_DIR}
 RM			=	rm -rf
-SRCS_DIR	=	src/
+SRCS_DIR	=	srcs/
 INCL_DIR	=	includes/
 OBJS_DIR	=	objs/
 
 #SOURCES
 
-SRCS_FILES	=	main
-INCL_FILES	=	
+SRCS_FILES	=	main polynomial
 
-SRCS 		= 	${addprefix ${SRCS_DIR}, ${addsuffix .c, ${SRCS_FILES}}}
+SRCS 		= 	${addprefix ${SRCS_DIR}, ${addsuffix .cpp, ${SRCS_FILES}}}
 OBJS 		= 	${addprefix ${OBJS_DIR}, ${addsuffix .o, ${SRCS_FILES}}}
 
 #COLORS
@@ -33,43 +30,28 @@ DEPS		=	${OBJS:.o=.d}
 
 all:		${NAME}
 
-${NAME}:	${LIBFT} ${OBJS}
-			@${CC} ${LDFLAGS} ${OBJS} ${LIBFT} -o ${NAME}
-			@printf "${BGREEN}Malloc compiled!${COLOR_END}\n"
+${NAME}:	${OBJS}
+			@${CXX} ${OBJS} -o ${NAME}
+			@printf "${BGREEN}ComputerV1 compiled!${COLOR_END}\n"
 
-${OBJS_DIR}%.o :	${SRCS_DIR}%.c | ${OBJSF}
+${OBJS_DIR}%.o :	${SRCS_DIR}%.cpp | ${OBJSF}
 			@mkdir -p $(dir $@)
-			@${CC} ${CFLAGS} -g -c $< -o $@
+			@${CXX} ${CXXFLAGS} -c $< -o $@
 
 ${OBJSF}:
 			@mkdir -p ${OBJS_DIR}
 
-${LIBFT}:
-			@make -C libft/
-			@make clean -C libft/
-
 clean:
 			@${RM} ${OBJS_DIR}
 			@${RM} ${OBJSF}
-			@printf "${BCYAN}Malloc .o files cleaned!${COLOR_END}\n"
+			@printf "${BCYAN}ComputerV1 .o files cleaned!${COLOR_END}\n"
 
 fclean:		clean
-			@${RM} ${SYMB}
 			@${RM} ${NAME}
-			@${RM} ${EXEC}
-			@make fclean -C libft/
-			@printf "${BBLUE}Malloc files cleaned!${COLOR_END}\n"
+			@printf "${BBLUE}ComputerV1 files cleaned!${COLOR_END}\n"
 
 re:			fclean all
 
-run:		all
-			@cc main.c ${LIBFT} -o ${EXEC} -g -L. -l${LNNAME}
-			@LD_LIBRARY_PATH=. ./${EXEC}
-
-stress:		all
-			@cc stress_test.c ${LIBFT} -o stress -g -L. -l${LNNAME}
-			@LD_LIBRARY_PATH=. ./stress
-
-.PHONY:		all clean fclean re run
+.PHONY:		all clean fclean re
 
 -include ${DEPS}

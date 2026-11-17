@@ -2,21 +2,23 @@
 
 #include <string>
 #include <exception>
-#include <ostream>
+#include <iostream>
 
 class Polynomial
 {
 private:
-	Polynomial(void);
-
-	std::string	_expression;
+	std::string	_expr;
 	int			_degree;
 	int			_discriminant;
 	int			_solutions[2];
-public:
-	Polynomial(std::string const &exp);
+	int			_a, _b, _c;
+
+	Polynomial(void);
 	Polynomial(Polynomial const &src);
 	Polynomial &operator=(Polynomial const &src);
+
+public:
+	Polynomial(std::string const &exp);
 	~Polynomial();
 
 	class ParseError: public std::exception
@@ -25,9 +27,21 @@ public:
 			const char* what() const throw ();
 	};
 
+	class SyntaxError: public std::exception
+	{
+		public:
+			const char* what() const throw ();
+	};
+
+	class DegreeError: public std::exception
+	{
+		public:
+			const char* what() const throw ();
+	};
+
 	std::string const getExpression(void) const;
 
-	int parse(void) const;
+	void parse();
+	void reduced_form();
+	void solve();
 };
-
-std::ostream &operator<<(std::ostream &o, Polynomial const &src);
