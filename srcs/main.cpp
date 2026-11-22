@@ -11,8 +11,10 @@ int main(int argc, char **argv)
 	else if (argc == 2)
 		arg = argv[1];
 	else
-		return 1;
-	std::cout << arg << std::endl;
+		return 1;	
+
+	//std::cout << arg << std::endl;
+
 	Polynomial polynomial(arg);
 	try
 	{

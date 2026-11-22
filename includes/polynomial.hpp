@@ -11,7 +11,7 @@ private:
 	int			_degree;
 	int			_discriminant;
 	int			_solutions[2];
-	int			_a, _b, _c;
+	int			_a, _b, _c; // corresponding to ax^2 + bx + c = 0
 
 	Polynomial(void);
 	Polynomial(Polynomial const &src);
