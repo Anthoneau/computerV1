@@ -3,6 +3,8 @@
 #include <string>
 #include <exception>
 #include <iostream>
+#include "monomial.hpp"
+#include <vector>
 
 class Polynomial
 {
@@ -12,6 +14,9 @@ private:
 	int			_discriminant;
 	int			_solutions[2];
 	int			_a, _b, _c; // corresponding to ax^2 + bx + c = 0
+
+	std::vector<Monomial>	_lh_side;
+	std::vector<Monomial>	_rh_side;
 
 	Polynomial(void);
 	Polynomial(Polynomial const &src);

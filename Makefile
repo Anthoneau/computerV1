@@ -10,7 +10,7 @@ OBJS_DIR	=	objs/
 
 #SOURCES
 
-SRCS_FILES	=	main polynomial
+SRCS_FILES	=	main polynomial monomial
 
 SRCS 		= 	${addprefix ${SRCS_DIR}, ${addsuffix .cpp, ${SRCS_FILES}}}
 OBJS 		= 	${addprefix ${OBJS_DIR}, ${addsuffix .o, ${SRCS_FILES}}}

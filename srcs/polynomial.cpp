@@ -2,7 +2,16 @@
 
 // CONSTRUCTOR AND DESTRUCTOR /////////////////////////////////////////////////
 
-Polynomial::Polynomial(std::string const &exp): _expr(exp) {}
+Polynomial::Polynomial(std::string const &exp): _expr(exp) {
+	_lh_side.reserve(3);
+	_rh_side.reserve(3);
+
+	for (int i = 0; i != 3; i++)
+	{
+		_lh_side[i].set_degree(i);
+		_rh_side[i].set_degree(i);
+	}
+}
 Polynomial::~Polynomial() {}
 
 // ERROR HANDLING /////////////////////////////////////////////////////////////
@@ -21,24 +30,62 @@ const char* Polynomial::DegreeError::what() const throw() {
 
 // FUNCTIONS //////////////////////////////////////////////////////////////////
 
-int monomial_end(char c)
+//int monomial_end(char c)
+//{
+//	if (c == '+' || c == '-' || c == '=')
+//	{
+//		std::cout << "*it : " << c << std::endl;
+//		return 1;
+//	}
+//	return 0;
+//}
+
+int find_sequence(char c, const char *sequence)
 {
-	if (c == '+' || c == '-' || c == '=')
-	{
-		std::cout << "*it : " << c << std::endl;
-		return 1;
-	}
+	if (!sequence)
+		return 0;
+	for (int i = 0; sequence[i]; i++)
+		if (c == sequence[i])
+			return 1;
 	return 0;
 }
 
-void check_substring(std::string monomial)
+void find_parasite(std::string monomial)
 {
-	int f_coeff = 0;
-	int f_x = 0;
-	int f_var = 0;
+	int var = 0;
+	int power = 0;
+	int star = 0;
+	for (std::string::iterator it = monomial.begin(); it != monomial.end(); it++)
+	{
+		if (!find_sequence(*it, " +-=0123456789X^*"))
+		{
+			std::cout << "caractere parasite : " << *it << std::endl;
+			throw Polynomial::SyntaxError();
+		}
+
+		if (*it == 'X')
+			var++;
+		else if (*it == '^')
+			power++;
+		else if (*it == '*')
+			star++;
+		if (var > 1 || power > 1 || star > 1)
+			throw Polynomial::SyntaxError();
+	}
+}
+
+void extract_and_check_monomial(std::string monomial)
+{
+	//int f_coeff = 0;
+	//int f_x = 0;
+	//int f_var = 0;
 	std::cout << "monomial : " << monomial << std::endl;
 	if (monomial.empty())
+	{
+		std::cout << "monome vide" << std::endl;
 		throw Polynomial::SyntaxError();
+	}
+	find_parasite(monomial);
 }
 
 void Polynomial::parse()
@@ -48,65 +95,46 @@ void Polynomial::parse()
 		check overflow en int (2147483647)
 		check "2 147 483 647X^2", ca fonctionne pourtant il y a erreur de syntax
 		erreur de syntax 
+		erreur avec "1 + 19348X^2=0X^0", le second monome ne prend que "19348X^"
 	 */
 
 	size_t begin_pos = 0;
 	size_t end_pos = 0;
 
 	if (_expr.length() == std::string::npos)
+	{
+		std::cout << "expression trop longue" << std::endl;
 		throw SyntaxError();
+	}
 
 	for (std::string::iterator it = _expr.begin(); it != _expr.end(); it++)
 	{
-		if (monomial_end(*it) || it + 1 == _expr.end())
+		end_pos++;
+		//if (monomial_end(*it) || it + 1 == _expr.end())
+		if (find_sequence(*it, "+-=") || it + 1 == _expr.end())
 		{
 			std::cout << "begin : " << begin_pos << std::endl;
 			std::cout << "end : " << end_pos << std::endl;
 			size_t len = end_pos - begin_pos - 1;
 			if (it + 1 == _expr.end())
 				len = std::string::npos;
-			check_substring(_expr.substr(begin_pos, len));
-			begin_pos = end_pos;
+			extract_and_check_monomial(_expr.substr(begin_pos, len));
+			begin_pos = end_pos - 1;
 		}
-		end_pos++;
 	}
 	if (begin_pos == 0 && end_pos == _expr.length())
+	{
+		std::cout << "only one monomial or syntax error" << std::endl;
 		throw SyntaxError();
-
-	//std::string::iterator temp;
-	//int begin_pos = 0;
-	//int end_pos = 0;
-	//int len = 0;
-	//int in_number = 0;
-
-	//for (std::string::iterator it = _expr.begin(); it != _expr.end(); it++)
-	//{
-	//	if (!in_number && is_number(*it))
-	//	{
-	//		temp = it;
-	//		in_number = 1;
-	//	}
-	//	else if (in_number && !is_number(*it))
-	//	{
-	//		in_number = 0;
-	//		_expr.substr()
-	//	}
-
-	//	if (*it == 'X' && it + 1 != _expr.end() && *(it + 1) == '^'
-	//		&& it + 2 != _expr.end() && *(it + 2) != '0' && *(it + 2) != '1'
-	//		&& *(it + 2) != '2') {
-	//		throw Polynomial::DegreeError();
-	//	}
-	//	len++;
-	//}
+	}
 }
 
-int is_number(char c)
-{
-	if (c == '+' || c == '-' || (c >= '0' && c <= '9'))
-		return 1;
-	return 0;
-}
+//int is_number(char c)
+//{
+//	if (c == '+' || c == '-' || (c >= '0' && c <= '9'))
+//		return 1;
+//	return 0;
+//}
 
 int ft_atoi_equation(std::string::iterator *begin, std::string::iterator end)
 {
@@ -122,10 +150,12 @@ int ft_atoi_equation(std::string::iterator *begin, std::string::iterator end)
 		(*begin)++;
 	}
 
-	while (*begin != end && is_number(**begin)) {
+	//while (*begin != end && is_number(**begin))
+	while (*begin != end && find_sequence(**begin, "+-0123456789"))
+	{
 		//std::cout << "boucle 2 atoi" << std::endl;
-		if (**begin == '-' || **begin == '+')
-			throw Polynomial::SyntaxError();
+		//if (**begin == '-' || **begin == '+')
+		//	throw Polynomial::SyntaxError();
 		a = a * 10 + (**begin - '0');
 		if (*begin + 1 != end)
 			(*begin)++;
@@ -138,12 +168,15 @@ int ft_atoi_equation(std::string::iterator *begin, std::string::iterator end)
 }
 
 int get_degree(std::string::iterator *begin, std::string::iterator end) {
+	//pas encore correct, il faut d'abord avoir toute la reduced form avant 
+	//determiner le degree d'une expr
 	while (*begin != end && **begin != '^')
 	{
 		(*begin)++;
 		//std::cout << "boucle 1 get degree" << std::endl;
 	}
-	while (*begin != end && !is_number(**begin))
+	//while (*begin != end && !is_number(**begin))
+	while (*begin != end && !find_sequence(**begin, "+-0123456789"))
 	{
 		(*begin)++;
 		//std::cout << "boucle 2 get degree" << std::endl;
@@ -163,7 +196,8 @@ void Polynomial::reduced_form()
 		if (*it == '=')
 			left = 0;
 		//std::cout << "it : " << *it << std::endl;
-		if (is_number(*it))
+		//if (is_number(*it))
+		if (find_sequence(*it, "+-0123456789"))
 		{
 			temp = ft_atoi_equation(&it, _expr.end());
 			//std::cout << "je ressors ca : " << temp << std::endl;
